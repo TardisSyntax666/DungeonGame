@@ -9,10 +9,14 @@ pygame.display.set_caption("Dungeon Game")
 
 CLOCK = pygame.time.Clock()
 FPS = 60
+ZOOM = 2
 
 GROUND = pygame.image.load(os.path.join("assets", "ground.png")).convert_alpha()
+GROUND = pygame.transform.scale(GROUND, (int(GROUND.get_rect().width*ZOOM), int(GROUND.get_rect().height*ZOOM)))
 WALL = pygame.image.load(os.path.join("assets", "wall.png")).convert_alpha()
+WALL = pygame.transform.scale(WALL, (int(WALL.get_rect().width*ZOOM), int(WALL.get_rect().height*ZOOM)))
 CHARACTER = pygame.image.load(os.path.join("assets", "character.png")).convert_alpha()
+CHARACTER = pygame.transform.scale(CHARACTER, (int(CHARACTER.get_rect().width*ZOOM), int(CHARACTER.get_rect().height*ZOOM)))
 
 
 def load_map(mapfilename):
@@ -45,18 +49,36 @@ def load_map(mapfilename):
 
 
 def draw_window(mapp, character_pos):
+    mapsize = (int(len(mapp[0])*20*ZOOM)), int(len(mapp)*20*ZOOM)
+    if 1001 > character_pos[0] > -1 and 801 > character_pos[1] > -1:
+        x_var = 500 - character_pos[0]
+        y_var = 400 - character_pos[1]
+        #x_var = 500 - 0
+        #y_var = 400 - 0
+        if x_var >= 500:
+            offx = int((x_var-500)/500*(1000-mapsize[0]))*-1
+        else:
+            offx = int(x_var / 500 * (1000 - mapsize[0]))*-1
+        if y_var >= 400:
+            offy = int((y_var - 400) / 400 * (1000 - mapsize[1]))
+        else:
+            offy = int(y_var / 400 * (1000 - mapsize[1]))
+    else:
+        offx = 0
+        offy = 0
+
     for i in range(len(mapp)):
         pos = 0
         row = mapp[i]
         for e in row:
             #time.sleep(0.01)
             if e == 0:
-                WINDOW.blit(WALL, (pos, (i*20)))
+                WINDOW.blit(WALL, (int(pos*ZOOM)+offx, int(i*20*ZOOM)+offy))
             else:
-                WINDOW.blit(GROUND, (pos, (i*20)))
+                WINDOW.blit(GROUND, (int(pos*ZOOM)+offx, int(i*20*ZOOM)+offy))
             #print(f"blited at {(pos, (i*20))}")
             pos += 20
-    WINDOW.blit(CHARACTER, character_pos)
+    WINDOW.blit(CHARACTER, (int(character_pos[0]*ZOOM)+offx, int(character_pos[1]*ZOOM)+offy))
     pygame.display.update()
 
 
@@ -65,6 +87,8 @@ def main():
     button_list = []
     mapp = load_map("map1.png")
     player_pos = (20, 20)
+    move_limit = 15
+    move_limiter = 0
 
     while run:
         CLOCK.tick(FPS)
@@ -73,17 +97,27 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-            if event.type == pygame.KEYDOWN:
-                print("yesy")
-                if event.key == pygame.K_UP or event.key == pygame.K_w:
-                    print(1)
-                    player_pos = (player_pos[0], player_pos[1] - 20)
-                if event.key == pygame.K_UP or event.key == pygame.K_w:
-                    player_pos = (player_pos[0], player_pos[1] + 20)
-                if event.key == pygame.K_UP or event.key == pygame.K_w:
-                    player_pos = (player_pos[0] - 20, player_pos[1])
-                if event.key == pygame.K_UP or event.key == pygame.K_w:
-                    player_pos = (player_pos[0] + 20, player_pos[1])
+
+        if move_limiter != 0:
+            if move_limiter == move_limit:
+                move_limiter = 0
+            else:
+                move_limiter += 1
+
+        keys_pressed = pygame.key.get_pressed()
+        if (keys_pressed[pygame.K_UP] or keys_pressed[pygame.K_w]) and move_limiter == 0:
+            player_pos = (player_pos[0], player_pos[1] - 20)
+            move_limiter += 1
+        if (keys_pressed[pygame.K_DOWN] or keys_pressed[pygame.K_s]) and move_limiter == 0:
+            player_pos = (player_pos[0], player_pos[1] + 20)
+            move_limiter += 1
+        if (keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_a]) and move_limiter == 0:
+            player_pos = (player_pos[0] - 20, player_pos[1])
+            move_limiter += 1
+        if (keys_pressed[pygame.K_RIGHT] or keys_pressed[pygame.K_d]) and move_limiter == 0:
+            player_pos = (player_pos[0] + 20, player_pos[1])
+            move_limiter += 1
+
 
         draw_window(mapp, player_pos)
     quit()

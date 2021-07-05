@@ -1,5 +1,5 @@
-from FloorTile import FloorTile
-from WallTile import WallTile
+from Tile import FloorTile, WallTile
+from Item import IronSword
 
 
 class Map:
@@ -8,24 +8,34 @@ class Map:
         self.map = []
         self.build_map(maplist)
 
+    def render(self, window, xoff, yoff, zoom):
+        for i in range(len(self.map)):
+            for e in range(len(self.map[i])):
+                self.map[i][e].render(window, self, xoff, yoff, zoom, self.player, e, i)
+
     def build_map(self, maplist):
         for i in range(len(maplist)):
             blank = []
             for e in range(len(maplist[i])):
+
                 if maplist[i][e] == 1:
                     floor = FloorTile()
                     blank.append(floor)
+
+                elif maplist[i][e] == 2:
+                    sword = IronSword()
+                    floor = FloorTile(sword)
+                    blank.append(floor)
+
+                elif maplist[i][e] == 'start':
+                    floor = FloorTile()
+                    self.player.x = e
+                    self.player.y = i
+                    blank.append(floor)
+
                 elif maplist[i][e] == 0:
                     wall = WallTile()
                     blank.append(wall)
+
             self.map.append(blank)
 
-    def move_player_right(self, num):
-        tile = self.map[self.player.y][self.player.x + num]
-        if tile.can_stand():
-            self.player.x += num
-
-    def move_player_up(self, num):
-        tile = self.map[self.player.y + num][self.player.x]
-        if tile.can_stand():
-            self.player.y += num

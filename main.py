@@ -29,49 +29,44 @@ def load_map(mapfilename):
             r, g, b = imgpxls[x, y]
             if r == 255 and g == 255 and b == 255:
                 map_list[y].append(0)
+            elif r == 0 and g == 0 and b == 255:
+                map_list[y].append(2)
+            elif r == 0 and g == 255 and b == 0:
+                map_list[y].append('start')
             else:
                 map_list[y].append(1)
 
-    # this was for visuallizing when it loads the png and converts it to a list
-    # for i in map_list:
-    #     str_to_prnt = ""
-    #     for e in i:
-    #          if e == 0:
-    #               str_to_prnt += "⬜"
-    #          else:
-    #               str_to_prnt += "⬛"
-    #     print(str_to_prnt)
     return map_list
 
 
 def draw_window(gameboard):
+    WINDOW.fill((0, 0, 0))
+
     player = gameboard.player
+
     map_width = int(len(gameboard.map[0]) * 20 * ZOOM)
     map_height = int(len(gameboard.map) * 20 * ZOOM)
     xvar = player.x * 20 * ZOOM / map_width
     yvar = player.y * 20 * ZOOM / map_height
     xoff = int((map_width - WIDTH) * xvar)
-    yoff = int((map_height - HEIGHT) * yvar)
+    yoff = int((map_height - 600) * yvar)
 
-    for i in range(len(gameboard.map)):
-        for j in range(len(gameboard.map[i])):
-            tile = gameboard.map[i][j]
-            tile_asset = pygame.transform.scale(tile.asset, (int(20 * ZOOM), int(20 * ZOOM)))
-            WINDOW.blit(tile_asset, (int(j * 20 * ZOOM)-xoff, int(i * 20 * ZOOM)-yoff))
+    gameboard.render(WINDOW, xoff, yoff, ZOOM)
+
     player_asset = pygame.transform.scale(player.asset, (int(20 * ZOOM), int(20 * ZOOM)))
+    WINDOW.blit(player_asset, (int(player.x * 20 * ZOOM) - xoff, int(player.y * 20 * ZOOM) - yoff))
 
-    WINDOW.blit(player_asset, (int(player.x * 20 * ZOOM)-xoff, int(player.y * 20 * ZOOM)-yoff))
     pygame.display.update()
 
 
 def main():
     run = True
     button_list = []
-    mapp = load_map("map1.png")
+    mapp = load_map("map2.png")
     player_pos = (20, 20)
-    move_limit = 15
+    move_limit = 10
     move_limiter = 0
-    player = Character("character.png")
+    player = Character("character.png", 100)
     game_board = Map(mapp, player)
 
     while run:
@@ -89,17 +84,22 @@ def main():
                 move_limiter += 1
 
         keys_pressed = pygame.key.get_pressed()
+        player = game_board.player
         if (keys_pressed[pygame.K_UP] or keys_pressed[pygame.K_w]) and move_limiter == 0:
-            game_board.move_player_up(-1)
+            if game_board.map[player.y - 1][player.x].can_stand():
+                player.move_up(-1)
             move_limiter += 1
         if (keys_pressed[pygame.K_DOWN] or keys_pressed[pygame.K_s]) and move_limiter == 0:
-            game_board.move_player_up(1)
+            if game_board.map[player.y + 1][player.x].can_stand():
+                player.move_up(1)
             move_limiter += 1
         if (keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_a]) and move_limiter == 0:
-            game_board.move_player_right(-1)
+            if game_board.map[player.y][player.x - 1].can_stand():
+                player.move_right(-1)
             move_limiter += 1
         if (keys_pressed[pygame.K_RIGHT] or keys_pressed[pygame.K_d]) and move_limiter == 0:
-            game_board.move_player_right(1)
+            if game_board.map[player.y][player.x + 1].can_stand():
+                player.move_right(1)
             move_limiter += 1
 
         draw_window(game_board)

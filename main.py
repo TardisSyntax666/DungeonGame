@@ -32,7 +32,7 @@ def load_map(mapfilename):
             elif r == 0 and g == 0 and b == 255:
                 map_list[y].append(2)
             elif r == 0 and g == 255 and b == 0:
-                map_list[y].append('start')
+                map_list[y].append('spawn')
             else:
                 map_list[y].append(1)
 
@@ -44,12 +44,12 @@ def draw_window(gameboard):
 
     player = gameboard.player
 
-    map_width = int(len(gameboard.map[0]) * 20 * ZOOM)
-    map_height = int(len(gameboard.map) * 20 * ZOOM)
+    map_width = len(gameboard.game_map[0]) * 20 * ZOOM
+    map_height = len(gameboard.game_map) * 20 * ZOOM
     xvar = player.x * 20 * ZOOM / map_width
     yvar = player.y * 20 * ZOOM / map_height
-    xoff = int((map_width - WIDTH) * xvar)
-    yoff = int((map_height - 600) * yvar)
+    xoff = int((map_width - WIDTH+600) * xvar)-300
+    yoff = int((map_height - HEIGHT+600) * yvar)-300
 
     gameboard.render(WINDOW, xoff, yoff, ZOOM)
 
@@ -86,19 +86,19 @@ def main():
         keys_pressed = pygame.key.get_pressed()
         player = game_board.player
         if (keys_pressed[pygame.K_UP] or keys_pressed[pygame.K_w]) and move_limiter == 0:
-            if game_board.map[player.y - 1][player.x].can_stand():
+            if game_board.game_map[player.y - 1][player.x].can_stand():
                 player.move_up(-1)
             move_limiter += 1
         if (keys_pressed[pygame.K_DOWN] or keys_pressed[pygame.K_s]) and move_limiter == 0:
-            if game_board.map[player.y + 1][player.x].can_stand():
+            if game_board.game_map[player.y + 1][player.x].can_stand():
                 player.move_up(1)
             move_limiter += 1
         if (keys_pressed[pygame.K_LEFT] or keys_pressed[pygame.K_a]) and move_limiter == 0:
-            if game_board.map[player.y][player.x - 1].can_stand():
+            if game_board.game_map[player.y][player.x - 1].can_stand():
                 player.move_right(-1)
             move_limiter += 1
         if (keys_pressed[pygame.K_RIGHT] or keys_pressed[pygame.K_d]) and move_limiter == 0:
-            if game_board.map[player.y][player.x + 1].can_stand():
+            if game_board.game_map[player.y][player.x + 1].can_stand():
                 player.move_right(1)
             move_limiter += 1
 

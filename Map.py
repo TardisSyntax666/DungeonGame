@@ -43,6 +43,18 @@ class Map:
                     floor = FloorTile(sword)
                     blank.append(floor)
 
+                elif maplist[i][e] == 3:
+                    floor = SecretWallTile()
+                    blank.append(floor)
+
+                elif maplist[i][e] == 4:
+                    door = DungeonDoor()
+                    blank.append(door)
+
+                elif maplist[i][e] == 5:
+                    door = CellDoor()
+                    blank.append(door)
+
                 elif maplist[i][e] == 'spawn':
                     floor = FloorTile()
                     self.player.x = e

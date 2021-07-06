@@ -74,6 +74,24 @@ class Torch(Item):
         return True
 
 
+class Lantern(Item):
+
+    def __init__(self):
+        super().__init__()
+        self.asset = pygame.image.load(os.path.join("assets", "lantern.png"))
+        self.resource = load_reasource("lantern_rad.png")
+
+    def use_item(self):
+        pass
+
+    def render(self, window, x, y, zoom, xoff, yoff):
+        asset = pygame.transform.scale(self.asset, (int(20 * zoom), int(20 * zoom)))
+        window.blit(asset, (int(x * 20 * zoom) - xoff, int(y * 20 * zoom) - yoff))
+
+    def is_bright(self):
+        return True
+
+
 class IronSword(Item):
 
     def __init__(self):

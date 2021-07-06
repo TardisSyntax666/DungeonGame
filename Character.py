@@ -1,6 +1,6 @@
 import pygame
 import os
-from Item import Torch
+from Item import *
 from PIL import Image
 
 def load_reasource(mapfilename):

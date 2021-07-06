@@ -3,6 +3,8 @@ import pygame
 import os
 import time
 
+from Tile import *
+
 from Map import Map
 from Character import Character
 
@@ -31,6 +33,12 @@ def load_map(mapfilename):
                 map_list[y].append(0)
             elif r == 0 and g == 0 and b == 255:
                 map_list[y].append(2)
+            elif r == 50 and g == 50 and b == 50:
+                map_list[y].append(3)
+            elif r == 255 and g == 0 and b == 0:
+                map_list[y].append(4)
+            elif r == 200 and g == 0 and b == 0:
+                map_list[y].append(5)
             elif r == 0 and g == 255 and b == 0:
                 map_list[y].append('spawn')
             else:
@@ -48,8 +56,8 @@ def draw_window(gameboard):
     map_height = len(gameboard.game_map) * 20 * ZOOM
     xvar = player.x * 20 * ZOOM / map_width
     yvar = player.y * 20 * ZOOM / map_height
-    xoff = int((map_width - WIDTH+600) * xvar)-300
-    yoff = int((map_height - HEIGHT+600) * yvar)-300
+    xoff = int((map_width - WIDTH + 600) * xvar) - 300
+    yoff = int((map_height - HEIGHT + 600) * yvar) - 300
 
     gameboard.render(WINDOW, xoff, yoff, ZOOM)
 
@@ -68,6 +76,7 @@ def main():
     move_limiter = 0
     player = Character("character.png", 100)
     game_board = Map(mapp, player)
+    changed_tiles = []
 
     while run:
         CLOCK.tick(FPS)
@@ -101,6 +110,17 @@ def main():
             if game_board.game_map[player.y][player.x + 1].can_stand():
                 player.move_right(1)
             move_limiter += 1
+
+        current_tile = game_board.game_map[player.y][player.x]
+        if type(current_tile) == SecretWallTile:
+            current_tile.asset = current_tile.asset_two
+        if current_tile.is_door():
+            current_tile.asset = current_tile.asset_two
+            changed_tiles.append(current_tile)
+        for i in changed_tiles:
+            if i != current_tile and i.is_door():
+                i.asset = i.asset_one
+                changed_tiles.remove(i)
 
         draw_window(game_board)
     quit()

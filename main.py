@@ -4,9 +4,9 @@ import os
 import time
 
 from Tile import *
-
 from Map import Map
 from Character import Character
+from UI import *
 
 WIDTH, HEIGHT = 1000, 800
 WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -14,7 +14,7 @@ pygame.display.set_caption("Dungeon Game")
 
 CLOCK = pygame.time.Clock()
 FPS = 60
-ZOOM = 2.5
+ZOOM = 3
 
 
 def load_map(mapfilename):
@@ -47,7 +47,7 @@ def load_map(mapfilename):
     return map_list
 
 
-def draw_window(gameboard):
+def draw_window(gameboard, stats_board):
     WINDOW.fill((0, 0, 0))
 
     player = gameboard.player
@@ -60,6 +60,7 @@ def draw_window(gameboard):
     yoff = int((map_height - HEIGHT + 600) * yvar) - 300
 
     gameboard.render(WINDOW, xoff, yoff, ZOOM)
+    stats_board.render(WINDOW, (300, 700))
 
     player_asset = pygame.transform.scale(player.asset, (int(20 * ZOOM), int(20 * ZOOM)))
     WINDOW.blit(player_asset, (int(player.x * 20 * ZOOM) - xoff, int(player.y * 20 * ZOOM) - yoff))
@@ -70,13 +71,14 @@ def draw_window(gameboard):
 def main():
     run = True
     button_list = []
-    mapp = load_map("map2.png")
+    mapp = load_map("map1.png")
     player_pos = (20, 20)
     move_limit = 10
     move_limiter = 0
     player = Character("character.png", 100)
     game_board = Map(mapp, player)
     changed_tiles = []
+    stats_board = StatsUI(player.inventory)
 
     while run:
         CLOCK.tick(FPS)
@@ -113,7 +115,9 @@ def main():
 
         current_tile = game_board.game_map[player.y][player.x]
         if type(current_tile) == SecretWallTile:
-            current_tile.asset = current_tile.asset_two
+            if not current_tile.found:
+                current_tile.reveal(game_board.game_map)
+
         if current_tile.is_door():
             current_tile.asset = current_tile.asset_two
             changed_tiles.append(current_tile)
@@ -122,7 +126,7 @@ def main():
                 i.asset = i.asset_one
                 changed_tiles.remove(i)
 
-        draw_window(game_board)
+        draw_window(game_board, stats_board)
     quit()
 
 

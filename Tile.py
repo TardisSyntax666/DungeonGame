@@ -1,3 +1,5 @@
+import random
+
 import pygame
 import os
 from Item import *
@@ -14,7 +16,7 @@ class Tile:
     def can_stand(self):
         return False
 
-    def render(self, light_level, window, gameboard, xoff, yoff, zoom, player, x, y):
+    def render(self, light_level, window, xoff, yoff, zoom, x, y):
         asset = pygame.transform.scale(self.asset, (int(20 * zoom), int(20 * zoom)))
         window.blit(asset, (int(x * 20 * zoom) - xoff, int(y * 20 * zoom) - yoff))
         if light_level == "dim":
@@ -83,7 +85,11 @@ class CellDoor(Door):
 class WallTile(Tile):
     def __init__(self):
         super().__init__()
-        self.asset = pygame.image.load(os.path.join("assets", "wall.png"))
+        num = random.randint(1, 100)
+        if num <= 65:
+            self.asset = pygame.image.load(os.path.join("assets", "stone_wall_1.png"))
+        else:
+            self.asset = pygame.image.load(os.path.join("assets", "stone_wall_2.png"))
 
     def can_stand(self):
         return False
@@ -96,6 +102,20 @@ class SecretWallTile(Tile):
         self.asset_two = pygame.image.load(os.path.join("assets", "ground.png"))
         self.asset = self.asset_one
         self.item = item
+        self.found = False
+        self.neighbours = []
 
     def can_stand(self):
         return True
+
+    def set_entrance(self):
+        self.asset_two = pygame.image.load(os.path.join("assets", "secret_wall_entrance.png"))
+
+    def reveal(self, map):
+        if not self.found:
+            self.found = True
+            self.asset = self.asset_two
+            for i in self.neighbours:
+                tile = map[i[1]][i[0]]
+                if not tile.found:
+                    tile.reveal(map)

@@ -8,6 +8,10 @@ class StatsUI:
         self.inventory = inventory
         self.buttons = {'item': ItemInvButton(inventory, (310, 746)), 'magic': MagicInvButton(inventory, (370, 746)),
                         'weapon': WeaponInvButton(inventory, (430, 746)), 'armour': ArmourInvButton(inventory, (490, 746))}
+        for i in self.buttons.items():
+            for e in self.buttons.items():
+                if not(i == e):
+                    i[1].family.append(e[1])
 
     def render(self, window, pos):
         window.blit(self.asset, pos)
@@ -45,16 +49,22 @@ class Button:
 
 class InvButton(Button):
     def __init__(self, pos):
-        super().__init__(pos, (25, 25))
+        super().__init__(pos, (50, 50))
         self.asset = pygame.image.load(os.path.join("assets", "no_texture.png"))
         self.hover_asset = pygame.image.load(os.path.join("assets", "button_hover.png"))
         self.select_asset = pygame.image.load(os.path.join("assets", "button_select.png"))
         self.item = None
+        self.family = []
+
+    def select(self):
+        self.selected = True
+        for i in self.family:
+            i.selected = False
 
     def render(self, window):
-        window.blit(self.asset, (self.x, self.y))
-        if self.selected and not self.hovering:
+        if self.selected:
             window.blit(self.select_asset, (self.x, self.y))
+        window.blit(self.asset, (self.x, self.y))
         if self.hovering:
             window.blit(self.hover_asset, (self.x, self.y))
         if self.item is not None:

@@ -87,6 +87,18 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                for i in stats_board.buttons.items():
+                    if i[1].is_over(pos):
+                        if i[1].selected:
+                            i[1].selected = False
+                        else:
+                            i[1].select()
+        for i in stats_board.buttons.items():
+            if i[1].is_over(pos):
+                i[1].hovering = True
+            elif not (i[1].is_over(pos)) and i[1].hovering:
+                i[1].hovering = False
 
         if move_limiter != 0:
             if move_limiter == move_limit:

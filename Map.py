@@ -50,11 +50,11 @@ class Map:
                     blank.append(floor)
 
                 elif maplist[i][e] == 4:
-                    door = DungeonDoor()
+                    door = DungeonDoorTile()
                     blank.append(door)
 
                 elif maplist[i][e] == 5:
-                    door = CellDoor()
+                    door = CellDoorTile()
                     blank.append(door)
 
                 elif maplist[i][e] == 'spawn':

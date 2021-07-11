@@ -45,6 +45,7 @@ class Item:
 
     def __init__(self):
         self.asset = pygame.image.load(os.path.join("assets", "no_item_texture.png"))
+        self.type = None
 
     def use_item(self):
         pass
@@ -62,6 +63,7 @@ class Torch(Item):
         super().__init__()
         self.asset = pygame.image.load(os.path.join("assets", "torch.png"))
         self.resource = load_reasource("torch_rad.png")
+        self.type = "item"
 
     def use_item(self):
         pass
@@ -80,6 +82,7 @@ class Lantern(Item):
         super().__init__()
         self.asset = pygame.image.load(os.path.join("assets", "lantern.png"))
         self.resource = load_reasource("lantern_rad.png")
+        self.type = "item"
 
     def use_item(self):
         pass
@@ -97,6 +100,7 @@ class IronSword(Item):
     def __init__(self):
         super().__init__()
         self.asset = pygame.image.load(os.path.join("assets", "iron_sword.png"))
+        self.type = "weapon"
 
     def use_item(self):
         pass

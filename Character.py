@@ -3,6 +3,7 @@ import os
 from Item import *
 from PIL import Image
 
+
 def load_reasource(mapfilename):
     map_list = []
     img = Image.open(os.path.join("assets", mapfilename)).convert('RGB')
@@ -37,7 +38,7 @@ def load_reasource(mapfilename):
                 resource.append(('dim', x - player_pos[0], y - player_pos[1]))
             else:
                 pass
-    #print(resource)
+    # print(resource)
     return resource
 
 

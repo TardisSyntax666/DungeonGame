@@ -60,7 +60,7 @@ def draw_window(gameboard, stats_board):
     yoff = int((map_height - HEIGHT + 600) * yvar) - 300
 
     gameboard.render(WINDOW, xoff, yoff, ZOOM)
-    stats_board.render(WINDOW, (300, 700))
+    stats_board.render(WINDOW, (200, 700))
 
     player_asset = pygame.transform.scale(player.asset, (int(20 * ZOOM), int(20 * ZOOM)))
     WINDOW.blit(player_asset, (int(player.x * 20 * ZOOM) - xoff, int(player.y * 20 * ZOOM) - yoff))
@@ -71,7 +71,7 @@ def draw_window(gameboard, stats_board):
 def main():
     run = True
     button_list = []
-    mapp = load_map("map1.png")
+    mapp = load_map("map2.png")
     player_pos = (20, 20)
     move_limit = 10
     move_limiter = 0
@@ -84,17 +84,70 @@ def main():
         CLOCK.tick(FPS)
         pos = pygame.mouse.get_pos()
         mouse_button_state = pygame.mouse.get_pressed(num_buttons=3)
+        keys_pressed = pygame.key.get_pressed()
+        player = game_board.player
+        current_tile = game_board.game_map[player.y][player.x]
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
             if event.type == pygame.MOUSEBUTTONDOWN:
-                for i in stats_board.buttons.items():
+                for i in stats_board.inv_buttons.items():
                     if i[1].is_over(pos):
                         if i[1].selected:
                             i[1].selected = False
                         else:
                             i[1].select()
+                for i in stats_board.buttons.items():
+                    if i[1].is_over(pos) and not i[1].locked:
+                        i[1].selected = True
+
+                button = stats_board.buttons["drop"]
+                select = stats_board.get_selected_invbutton()
+                if button.is_over(pos) and not button.locked:
+                    current_tile.item = select.item
+                    player.inventory[current_tile.item.type] = None
+                    stats_board.update_inventory(player.inventory)
+
+                button = stats_board.buttons["pickup"]
+                select = stats_board.get_selected_invbutton()
+                if button.is_over(pos) and not button.locked:
+                    player.inventory[current_tile.item.type] = current_tile.item
+                    current_tile.item = None
+                    stats_board.update_inventory(player.inventory)
+
+            if event.type == pygame.KEYDOWN:
+
+                if event.key in [pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4]:
+                    if event.key == pygame.K_1:
+                        button = stats_board.inv_buttons['item']
+                    elif event.key == pygame.K_2:
+                        button = stats_board.inv_buttons['magic']
+                    elif event.key == pygame.K_3:
+                        button = stats_board.inv_buttons['weapon']
+                    else:
+                        button = stats_board.inv_buttons['armour']
+                    if button.selected:
+                        button.selected = False
+                    else:
+                        button.select()
+
+        if mouse_button_state[0]:
+            for i in stats_board.buttons.items():
+                if i[1].is_over(pos) and not i[1].locked:
+                    i[1].selected = True
+                if not i[1].is_over(pos):
+                    i[1].selected = False
+        if not mouse_button_state[0]:
+            for i in stats_board.buttons.items():
+                if i[1].is_over(pos) and not i[1].locked:
+                    i[1].selected = False
+
         for i in stats_board.buttons.items():
+            if i[1].is_over(pos):
+                i[1].hovering = True
+            elif not (i[1].is_over(pos)) and i[1].hovering:
+                i[1].hovering = False
+        for i in stats_board.inv_buttons.items():
             if i[1].is_over(pos):
                 i[1].hovering = True
             elif not (i[1].is_over(pos)) and i[1].hovering:
@@ -106,8 +159,6 @@ def main():
             else:
                 move_limiter += 1
 
-        keys_pressed = pygame.key.get_pressed()
-        player = game_board.player
         if (keys_pressed[pygame.K_UP] or keys_pressed[pygame.K_w]) and move_limiter == 0:
             if game_board.game_map[player.y - 1][player.x].can_stand():
                 player.move_up(-1)
@@ -125,7 +176,6 @@ def main():
                 player.move_right(1)
             move_limiter += 1
 
-        current_tile = game_board.game_map[player.y][player.x]
         if type(current_tile) == SecretWallTile:
             if not current_tile.found:
                 current_tile.reveal(game_board.game_map)
@@ -133,6 +183,29 @@ def main():
         if current_tile.is_door():
             current_tile.asset = current_tile.asset_two
             changed_tiles.append(current_tile)
+
+        if current_tile.item is not None:
+            if current_tile.item.type == "item" and player.inventory["item"] is None:
+                stats_board.buttons["pickup"].locked = False
+            else:
+                stats_board.buttons["pickup"].locked = True
+            if current_tile.item.type == "magic" and player.inventory["magic"] is None:
+                stats_board.buttons["pickup"].locked = False
+            if current_tile.item.type == "weapon" and player.inventory["weapon"] is None:
+                stats_board.buttons["pickup"].locked = False
+            if current_tile.item.type == "armour" and player.inventory["armour"] is None:
+                stats_board.buttons["pickup"].locked = False
+        else:
+            stats_board.buttons["pickup"].locked = True
+        if current_tile.item is None:
+            select = stats_board.get_selected_invbutton()
+            if select is not None and select.item is not None:
+                stats_board.buttons["drop"].locked = False
+            else:
+                stats_board.buttons["drop"].locked = True
+        else:
+            stats_board.buttons["drop"].locked = True
+
         for i in changed_tiles:
             if i != current_tile and i.is_door():
                 i.asset = i.asset_one

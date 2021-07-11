@@ -40,7 +40,7 @@ class FloorTile(Tile):
         return True
 
 
-class Door(Tile):
+class DoorTile(Tile):
     def __init__(self, item=None, locked=False):
         super().__init__()
         self.asset_one = pygame.image.load(os.path.join("assets", "no_tile_texture.png"))
@@ -56,7 +56,7 @@ class Door(Tile):
         return True
 
 
-class DungeonDoor(Door):
+class DungeonDoorTile(DoorTile):
     def __init__(self, item=None, locked=False):
         super().__init__()
         self.asset_one = pygame.image.load(os.path.join("assets", "dungeon_door.png"))
@@ -69,7 +69,7 @@ class DungeonDoor(Door):
         return not self.locked
 
 
-class CellDoor(Door):
+class CellDoorTile(DoorTile):
     def __init__(self, item=None, locked=False):
         super().__init__()
         self.asset_one = pygame.image.load(os.path.join("assets", "cell_door.png"))
